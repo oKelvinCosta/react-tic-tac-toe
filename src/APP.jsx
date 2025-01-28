@@ -4,12 +4,6 @@ import { useState } from "react";
 // state. Since state is private to a component that defines it,
 //  you cannot update the Board’s state directly from Square.
 function Square({ value, onSquareClick }) {
-  // const [value, setValue] = useState(null);
-
-  // function handleClick() {
-  //   setValue('X');
-  // }
-
   return (
     <button className="square" onClick={onSquareClick}>
       {value}
@@ -19,17 +13,37 @@ function Square({ value, onSquareClick }) {
 
 // Componente principal
 export default function Board() {
+  const [xIsNext, setXIsNext] = useState(true);
   const [squares, setSquares] = useState(Array(9).fill(null));
+
+  const winner = calculateWinner(squares);
+  let status;
+  if(winner) {
+    status = `Winner: ${winner}`;
+  }else{
+    status = `Next player: ${xIsNext ? "X" : "O"}`;
+  }
 
   // Instead, you’ll pass down a function from the Board component to the Square component, and you’ll have Square call that function when a square is clicked.
   function handleClick(index) {
+    if(squares[index] || calculateWinner(squares)) {
+      return;
+    }
     const newSquares = squares.slice();
-    newSquares[index] = "X";
+    if (xIsNext) {
+      newSquares[index] = "X";
+    } else {
+      newSquares[index] = "O";
+    }
     setSquares(newSquares);
+    setXIsNext(!xIsNext);
+
   }
 
   return (
     <>
+      <div className="status">{status}</div>
+
       <div className="board-row">
         <Square value={squares[0]} onSquareClick={() => handleClick(0)} />
         <Square value={squares[1]} onSquareClick={() => handleClick(1)} />
@@ -47,4 +61,34 @@ export default function Board() {
       </div>
     </>
   );
+}
+
+
+
+function calculateWinner(squares) {
+  const lines = [
+    [0, 1, 2],
+    [3, 4, 5],
+    [6, 7, 8],
+    [0, 3, 6],
+    [1, 4, 7],
+    [2, 5, 8],
+    [0, 4, 8],
+    [2, 4, 6]
+  ];
+  for (let i = 0; i < lines.length; i++) {
+
+    // Destructuring
+    // const a = lines[i][0];
+    // const b = lines[i][1];
+    // const c = lines[i][2];
+
+    // explanation: 
+    // const [a, b, c] = [0, 1, 2] => a = 0, b = 1, c = 2
+    const [a, b, c] = lines[i];
+    if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
+      return squares[a];
+    }
+  }
+  return null;
 }
