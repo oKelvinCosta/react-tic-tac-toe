@@ -1,19 +1,50 @@
 import { useState } from 'react';
 
+/**
+ * Renders a square button for the game board.
+ *
+ * Props:
+ * - value: The current value ('X', 'O', or null) to display inside the button.
+ * - onSquareClick: Function to handle click events on the square.
+ */
+
 function Square({ value, onSquareClick }) {
+  // On click, the handleClick function manages the X or O value
   return (
     <button className="square" onClick={onSquareClick}>
       {value}
     </button>
   );
 }
+ 
+
+// squares -> Array with the current values of the squares
+
+
+
+/**
+ * Renders the game board with nine squares, and keeps track of the game's
+ * state.
+ *
+ * Props:
+ * - xIsNext: Boolean indicating whether it's X's turn or O's turn.
+ * - squares: Array with the current values of the squares.
+ * - onPlay: Function to handle moves on the board.
+ */
 
 function Board({ xIsNext, squares, onPlay }) {
+
+  // manages the X or O value
   function handleClick(i) {
+    // If there is a winner or there is already a value in the square, do not change the value of the square, because nothing is executed
     if (calculateWinner(squares) || squares[i]) {
       return;
     }
+
+
+    // Creates a new array with the value of the square changed to not overwrite the original array
     const nextSquares = squares.slice();
+    // xIsNext represents which player will play
     if (xIsNext) {
       nextSquares[i] = 'X';
     } else {
@@ -22,6 +53,8 @@ function Board({ xIsNext, squares, onPlay }) {
     onPlay(nextSquares);
   }
 
+  
+  // Winner, if it is X or O
   const winner = calculateWinner(squares);
   let status;
   if (winner) {
@@ -52,22 +85,61 @@ function Board({ xIsNext, squares, onPlay }) {
   );
 }
 
+/**
+ * Renders the main game component, managing the state of the game history
+ * and current move. Provides functionality to handle player moves and
+ * navigate through the game's history.
+ *
+ * State:
+ * - history: Array tracking the sequence of board states after each move.
+ * - currentMove: Integer representing the index of the current move in history.
+ * 
+ * Functions:
+ * - handlePlay: Updates the game history and current move based on the
+ *   provided board state after a move.
+ * - jumpTo: Sets the current move to a specified move in the history.
+ * 
+ * The component renders the game board and a list of buttons to navigate
+ * through the game history.
+ */
+
 export default function Game() {
   const [history, setHistory] = useState([Array(9).fill(null)]);
   const [currentMove, setCurrentMove] = useState(0);
   const xIsNext = currentMove % 2 === 0;
+  // The history start as a empry array, so currentSquares is the first one like the history
   const currentSquares = history[currentMove];
 
+
+  /**
+   * Updates the game history and current move based on the
+   * provided board state after a move.
+   *
+   * @param {Array} nextSquares - The new state of the board after the move.
+   */
   function handlePlay(nextSquares) {
+
+    // Adds the new state of the board to the history
     const nextHistory = [...history.slice(0, currentMove + 1), nextSquares];
     setHistory(nextHistory);
     setCurrentMove(nextHistory.length - 1);
   }
 
+  /**
+   * Sets the current move to a specified move in the history.
+   * @param {Number} nextMove - The index of the move in the history to jump to.
+   */
   function jumpTo(nextMove) {
     setCurrentMove(nextMove);
   }
 
+  /**
+   * Renders a list of buttons to navigate through the game history.
+   * Each button represents a move in the game and calls the jumpTo function
+   * with the corresponding move index.
+   *
+   * @returns {JSX.Element} A list of buttons representing the game history.
+   */
   const moves = history.map((squares, move) => {
     let description;
     if (move > 0) {
@@ -93,6 +165,21 @@ export default function Game() {
     </div>
   );
 }
+
+/**
+ * Determines the winner of a tic-tac-toe game.
+ *
+ * Takes an array representing the current state of the board squares.
+ * Each element in the array corresponds to a square on the board and
+ * can contain 'X', 'O', or null if the square is empty.
+ *
+ * The function checks all possible winning combinations on a 3x3 board
+ * and returns 'X' or 'O' if there is a winner. If there is no winner,
+ * the function returns null.
+ *
+ * @param {Array} squares - An array of 9 elements representing the board state.
+ * @return {string|null} - Returns 'X', 'O', or null if there is no winner.
+ */
 
 function calculateWinner(squares) {
   const lines = [
